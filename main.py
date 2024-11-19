@@ -3,8 +3,24 @@ from sqlalchemy.orm import Session
 import models, database, schemas
 from database import get_db
 from utils import hash_password, verify_password, create_access_token
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+# Define the allowed origins (this can be a list of domains)
+origins = [
+    "http://localhost:3000",  # Your Next.js frontend
+    # Add any other allowed origins as needed
+]
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
+)
+
 
 # Create database tables
 models.Base.metadata.create_all(bind=database.engine)
