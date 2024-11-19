@@ -8,7 +8,9 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 
 origins = [
-    "http://localhost:3000",  # Your Next.js frontend
+    "http://localhost:3000",
+    "http://localhost:3006",
+    "http://localhost",# Your Next.js frontend
     # Add any other allowed origins as needed
 ]
 
