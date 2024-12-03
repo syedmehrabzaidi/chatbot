@@ -2,13 +2,16 @@
 import os
 from openai import AzureOpenAI
 import json
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
-REPLACE_WITH_YOUR_KEY_VALUE_HERE = "88a0cfe846e743358d9eb13fa94a255d"
 
 endpoint = os.getenv("ENDPOINT_URL", "https://openai-dev-model.openai.azure.com/")
 deployment = os.getenv("DEPLOYMENT_NAME", "gpt-35-turbo")
-subscription_key = os.getenv("AZURE_OPENAI_API_KEY", REPLACE_WITH_YOUR_KEY_VALUE_HERE)
+subscription_key = os.getenv("AZURE_OPENAI_API_KEY")
+
 
 # Initialize the client
 client = AzureOpenAI(
@@ -67,3 +70,66 @@ def gpt(request_data):
     formatted_content = json.dumps(content_dict, indent=4)
     print(formatted_content)
     return formatted_content
+
+
+def generate_cv_gpt(description: str) -> str:
+    prompt = f"""
+    Based on the following job description, generate CV pointers in STAR format for multiple companies.
+    Job Description: {description}
+
+    Provide output in the format:
+    Company name:
+    1. Pointer in STAR format
+    2. Pointer in STAR format
+    Company name:
+    1. Pointer in STAR format
+    2. Pointer in STAR format
+    """
+
+    response = client.chat.completions.create(
+        model=deployment,
+        # model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=400,  # Limit the token count as per requirement
+        temperature=0.7,
+        top_p=0.95,
+        frequency_penalty=0,
+        presence_penalty=0,
+        stop=None,
+        stream=False
+    )
+    print("-----response gpt----------------------------------",response)
+    # Return GPT response content
+    return response.choices[0].message.content
+
+
+def generate_appraisal_pointers(from_date: str, to_date: str) -> str:
+    # Formulate the GPT prompt
+    prompt = f"""
+    Based on the given date range from {from_date} to {to_date}, generate appraisal report pointers in the following format:
+    
+    Appraisal Report pointers:
+    Month / Year
+    1. Pointer in STAR format
+    2. Pointer in STAR format
+
+    Month / Year
+    1. Pointer in STAR format
+    2. Pointer in STAR format
+    """
+
+    # Make the API call to OpenAI
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=400,  # Limit the token count as per requirement
+        temperature=0.7,
+        top_p=0.95,
+        frequency_penalty=0,
+        presence_penalty=0,
+        stop=None,
+        stream=False
+    )
+    
+    # Extract GPT response content
+    return response['choices'][0]['message']['content']
