@@ -13,8 +13,8 @@ class UserLogin(BaseModel):
 
 # Entry schema
 class EntryCreate(BaseModel):
-    entry_type: str  # Professional or Educational
-    description: str
+    # entry_type: str  # Professional or Educational
+    # description: str
     date: date
     company_name: str
     keyword: Optional[str] = None
