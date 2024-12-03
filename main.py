@@ -4,16 +4,21 @@ from datetime import date
 from typing import List
 import models, database, schemas
 from database import get_db
+
 from utils import hash_password, verify_password, create_access_token, query_chatgpt, extract_text_from_pdf
 import shutil
 import os
+
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
 origins = [
-    "http://localhost:3000",  # Your Next.js frontend
-    # Add any other allowed origins as needed
+
+    "http://localhost:3000",
+    "http://localhost:3006",
+    "http://localhost",# Your Next.js frontend
+  # Add any other allowed origins as needed
 ]
 
 # Add CORS middleware
@@ -50,6 +55,7 @@ def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
     return { "message":"User is created successfully",
             "status" : 200,
         "user_details": new_user}
+
 
 @app.post("/login")
 def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
