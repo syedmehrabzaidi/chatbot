@@ -2,13 +2,17 @@
 import os
 from openai import AzureOpenAI
 import json
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
-REPLACE_WITH_YOUR_KEY_VALUE_HERE = "88a0cfe846e743358d9eb13fa94a255d"
 
 endpoint = os.getenv("ENDPOINT_URL", "https://openai-dev-model.openai.azure.com/")
 deployment = os.getenv("DEPLOYMENT_NAME", "gpt-35-turbo")
-subscription_key = os.getenv("AZURE_OPENAI_API_KEY", REPLACE_WITH_YOUR_KEY_VALUE_HERE)
+subscription_key = os.getenv("AZURE_OPENAI_API_KEY")
+
+print("------------subscription_key------------",subscription_key)
 
 # Initialize the client
 client = AzureOpenAI(
