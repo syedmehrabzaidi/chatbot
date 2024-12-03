@@ -4,16 +4,25 @@ from datetime import date
 from typing import List
 import models, database, schemas
 from database import get_db
+from datetime import datetime
+
 from utils import hash_password, verify_password, create_access_token, query_chatgpt, extract_text_from_pdf
 import shutil
 import os
+from gpt import gpt
+import json
+
+
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
 origins = [
-    "http://localhost:3000",  # Your Next.js frontend
-    # Add any other allowed origins as needed
+
+    "http://localhost:3000",
+    "http://localhost:3006",
+    "http://localhost",# Your Next.js frontend
+  # Add any other allowed origins as needed
 ]
 
 # Add CORS middleware
@@ -51,6 +60,7 @@ def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
             "status" : 200,
         "user_details": new_user}
 
+
 @app.post("/login")
 def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
     db_user = db.query(models.User).filter(models.User.email == user.email).first()
@@ -78,9 +88,29 @@ def create_entry(entry: schemas.EntryCreate, db: Session = Depends(get_db)):
 
 @app.post("/entry_to_gpt")
 async def create_entry(entry_type: str = Body(...), description: str = Body(...)):
-    prompt = f"{entry_type}: {description}"
-    response_text = query_chatgpt(prompt)
-    return {"response": response_text}
+
+    # {
+#     "entry_type": "professional",
+#     "description": "i am developer"
+# }
+
+    prompt = {"entry_type":entry_type,
+              "description": description}
+
+    # response_text = query_chatgpt(prompt)
+    print("----prompt-----------",prompt)
+    response_text = gpt(prompt)
+    print("-------gpt----------",response_text)
+    response_dict = json.loads(response_text)
+     # Add the current date to the response dictionary
+    response_dict["date"] = datetime.now().strftime("%d/%m/%Y")
+
+
+    # Print the parsed response for debugging
+    print("----res-------------------", json.dumps(response_dict, indent=4))
+
+    # Return the parsed response directly
+    return response_dict
 
 
 
