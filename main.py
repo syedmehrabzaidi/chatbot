@@ -41,10 +41,6 @@ models.Base.metadata.create_all(bind=database.engine)
 async def options_signup():
     return {"message": "CORS preflight request handled"}
 
-@app.options("/login")
-async def options_signup():
-    return {"message": "CORS preflight request handled"}
-
 @app.post("/signup")
 def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
     db_user_email = db.query(models.User).filter(models.User.email == user.email).first()
@@ -64,6 +60,10 @@ def signup(user: schemas.UserCreate, db: Session = Depends(get_db)):
             "status" : 200,
         "user_details": new_user}
 
+
+@app.options("/login")
+async def options_login():
+    return {"message": "CORS preflight request handled"}
 
 @app.post("/login")
 def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
