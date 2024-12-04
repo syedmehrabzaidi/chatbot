@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, Form, Body
+from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, Form, Body, Request
 from sqlalchemy.orm import Session
 from datetime import date
 from typing import List
@@ -38,6 +38,10 @@ app.add_middleware(
 models.Base.metadata.create_all(bind=database.engine)
 
 @app.options("/signup")
+async def options_signup():
+    return {"message": "CORS preflight request handled"}
+
+@app.options("/login")
 async def options_signup():
     return {"message": "CORS preflight request handled"}
 
@@ -132,3 +136,47 @@ def get_entries(from_date: date, to_date: date, db: Session = Depends(get_db)):
     if not entries:
         raise HTTPException(status_code=404, detail="No entries found")
     return entries
+
+
+@app.post("/generate_cv")
+async def generate_cv(request: Request):
+    # Parse JSON body from request
+    data = await request.json()
+    description = data.get("description")
+
+    if not description:
+        return {"error": "Job description is required"}
+    print("-----description-----------------",description)
+
+    from gpt import generate_cv_gpt
+    # Generate CV pointers using GPT
+    cv_pointers = generate_cv_gpt(description)
+    print("-----cv_pointers-----------------",cv_pointers)
+
+    # Return the CV pointers formatted
+    return cv_pointers
+
+
+@app.post("/generate_appraisal_report")
+async def generate_appraisal_report(request: Request):
+    # Parse JSON body from the request
+    data = await request.json()
+    from_date = data.get("from_date")
+    to_date = data.get("to_date")
+
+    # Validate the input dates
+    if not from_date or not to_date:
+        return {"error": "Both from_date and to_date are required"}
+
+    try:
+        # Ensure the dates are in MM/YYYY format
+        from_date_parsed = datetime.strptime(from_date, '%m/%Y')
+        to_date_parsed = datetime.strptime(to_date, '%m/%Y')
+    except ValueError:
+        return {"error": "Dates must be in MM/YYYY format"}
+
+    # Generate appraisal report pointers using GPT
+    # appraisal_pointers = generate_appraisal_pointers(from_date, to_date)
+    
+    # Return the appraisal pointers formatted
+    return {"appraisal_pointers": "appraisal_pointers"}
