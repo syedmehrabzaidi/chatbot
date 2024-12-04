@@ -18,12 +18,17 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 
 origins = [
-
+    "*",
     "http://localhost:3000",
+    "http://localhost:3001",
+    "http://localhost:3002",
+    "http://localhost:3003",
+    "http://localhost:3004",
+    "http://localhost:3005",
     "http://localhost:3006",
-    "http://localhost",# Your Next.js frontend
-  # Add any other allowed origins as needed
+    "http://localhost",
 ]
+
 
 # Add CORS middleware
 app.add_middleware(
@@ -120,14 +125,22 @@ async def create_entry(entry_type: str = Body(...), description: str = Body(...)
 
 @app.post("/upload_pdf")
 def bulk_entry(files: List[UploadFile] = File(...), db: Session = Depends(get_db)):
+    responses = []  # To collect all responses
     for file in files:
         # Extract text from the file
         file_content = extract_text_from_pdf(file)
-        print("----------",file_content)
-        response_text = query_chatgpt(file_content)
+        print("Extracted content from PDF:", file_content)
         
-        # Return the response from the ChatGPT API
-        return {"response": response_text}
+        # Get the GPT response as a dictionary
+        response_dict = gpt(file_content)
+        response_dict['date'] = datetime.now().datetime.now().strftime('%Y-%m-%d')
+        
+        # Append the response to the list
+        responses.append(response_dict)
+    
+    # Return the collected responses as a proper JSON structure
+    return responses
+
 
 
 @app.get("/view_journal", response_model=List[schemas.EntryResponse])
