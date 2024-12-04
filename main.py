@@ -18,12 +18,17 @@ from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 
 origins = [
-
+    "*",
     "http://localhost:3000",
+    "http://localhost:3001",
+    "http://localhost:3002",
+    "http://localhost:3003",
+    "http://localhost:3004",
+    "http://localhost:3005",
     "http://localhost:3006",
-    "http://localhost",# Your Next.js frontend
-  # Add any other allowed origins as needed
+    "http://localhost",
 ]
+
 
 # Add CORS middleware
 app.add_middleware(
