@@ -28,23 +28,23 @@ client = AzureOpenAI(
 def gpt(request_data):
     # Create the completion request
     completion = client.chat.completions.create(
-    model=deployment,
-    messages=[
-        {
-            "role": "system",
-            "content": "You are an AI assistant that helps people find information."
-        },
-        {
-            "role": "user",
-            "content": f"Generate a response in the following format based on the given data:\n\n"
-                       f"Request Data:\n{request_data}\n\n"
-                       f"Response Format:\n{{\n"
-                       f"    \"company_name\": \"\",\n"
-                       f"    \"keywords\": \"\",\n"
-                       f"    \"detail_description\": \"\"\n"
-                       f"}}\n\n"
-                       f"Generate the response based on the description provided."
-        }
+        model=deployment,
+        messages=[
+            {
+                "role": "system",
+                "content": "You are an AI assistant that helps people find information."
+            },
+            {
+                "role": "user",
+                "content": f"Generate a response in the following format based on the given data:\n\n"
+                           f"Request Data:\n{request_data}\n\n"
+                           f"Response Format:\n{{\n"
+                           f"    \"company_name\": \"\",\n"
+                           f"    \"keywords\": \"\",\n"
+                           f"    \"detail_description\": \"\"\n"
+                           f"}}\n\n"
+                           f"Generate the response based on the description provided."
+            }
         ],
         max_tokens=800,
         temperature=0.7,
@@ -54,22 +54,19 @@ def gpt(request_data):
         stop=None,
         stream=False
     )
-    # Parse the JSON response
-    response_json = json.loads(completion.to_json())
-    print("---messages----------------",response_json)
+    
+    # Parse the JSON response from the API
+    response_json = completion.to_dict()
 
-
-    # Extract the content field
+    # Extract the 'content' field from the response
     content = response_json['choices'][0]['message']['content']
 
-    # Print the extracted content
-    print(content)
-
-    # If you need to return it in a specific format, you can parse the content string
+    # Convert the content into a Python dictionary
     content_dict = json.loads(content)
-    formatted_content = json.dumps(content_dict, indent=4)
-    print(formatted_content)
-    return formatted_content
+    print("-----gpt func()-----cont-------------------------------")
+    # Return the parsed dictionary directly
+    return content_dict
+
 
 
 def generate_cv_gpt(description: str) -> str:

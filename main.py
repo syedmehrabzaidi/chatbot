@@ -112,7 +112,7 @@ async def create_entry(entry_type: str = Body(...), description: str = Body(...)
     print("-------gpt----------",response_text)
     response_dict = json.loads(response_text)
      # Add the current date to the response dictionary
-    response_dict["date"] = datetime.now().strftime("%d/%m/%Y")
+    response_dict["date"] = datetime.now().strftime('%Y-%m-%d')
 
 
     # Print the parsed response for debugging
@@ -125,14 +125,23 @@ async def create_entry(entry_type: str = Body(...), description: str = Body(...)
 
 @app.post("/upload_pdf")
 def bulk_entry(files: List[UploadFile] = File(...), db: Session = Depends(get_db)):
+    responses = []  # To collect all responses
     for file in files:
         # Extract text from the file
         file_content = extract_text_from_pdf(file)
-        print("----------",file_content)
-        response_text = query_chatgpt(file_content)
+        print("Extracted content from PDF:", file_content)
         
-        # Return the response from the ChatGPT API
-        return {"response": response_text}
+        # Get the GPT response as a dictionary
+        response_dict = gpt(file_content)
+        response_dict['date'] = datetime.now().strftime('%Y-%m-%d')
+        
+        # Append the response to the list
+        responses.append(response_dict)
+        print("-----responsessss-------------------------------",responses)
+    
+    # Return the collected responses as a proper JSON structure
+    return responses
+
 
 
 @app.get("/view_journal", response_model=List[schemas.EntryResponse])
